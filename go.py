@@ -74,7 +74,7 @@ def discover_changes(last_revision=pysvn.Revision(pysvn.opt_revision_kind.number
         revision_end=last_revision
         )
     if len(log) is 1:
-        return last_revision, None, None
+        return last_revision, None, None, None
     authors = []
     paths = []
     messages = []
