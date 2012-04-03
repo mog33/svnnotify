@@ -37,25 +37,27 @@ def read_config():
         print e
         exit()
 
-def notify(paths, authors):
+def notify(paths, authors, messages, numbers):
     """Display the changed paths using libnotify"""
     title_string = 'New commits to repository'
     path_string = ', '.join(paths)
     author_string = ', '.join(authors)
-    message_string = path_string
+    number_string = ', '.join(numbers)
+    message_string = path_string + ' ' + number_string
     
     if pynotify.init("SVN Monitor"):
         n = pynotify.Notification(title_string, message_string, "emblem-shared")
         n.show()
 
-def log_message(paths, authors, messages):
+def log_message(paths, authors, messages, revisions):
     """Print a log message containing the time, authors, paths, and messages"""
     now = datetime.datetime.now()
     now = now.strftime("%H:%M")
     path_string = ', '.join(paths)
     author_string = ', '.join(authors)
     message_string = ', '.join(messages)
-    print "[%s] Paths: %s -- Authors: %s -- Messages: %s" % (now, path_string, author_string, message_string)
+    number_string = ', '.join(revisions)
+    print "[%s] Paths: %s -- Authors: %s -- Revisions: %s -- Messages: %s" % (now, path_string, author_string, number_string, message_string)
     
 
 def credentials(realm, username, may_save):
@@ -65,7 +67,7 @@ def credentials(realm, username, may_save):
 def discover_changes(last_revision=pysvn.Revision(pysvn.opt_revision_kind.number, 0)):
     """Find out the changes occured since the last time this method is ran"""
     if last_revision is None:
-        last_revision=pysvn.Revision(pysvn.opt_revision_kind.number, 0)
+        last_revision=pysvn.Revision(pysvn.opt_revision_kind.number, 18180)
     client = pysvn.Client()
     client.callback_get_login = credentials
     log = client.log(
@@ -74,10 +76,11 @@ def discover_changes(last_revision=pysvn.Revision(pysvn.opt_revision_kind.number
         revision_end=last_revision
         )
     if len(log) is 1:
-        return last_revision, None, None, None
+        return last_revision, None, None, None, None
     authors = []
     paths = []
     messages = []
+    revisions = []
     for entry in log[:-1]:
         if entry.author not in authors:
             authors.append(entry.author)
@@ -86,9 +89,10 @@ def discover_changes(last_revision=pysvn.Revision(pysvn.opt_revision_kind.number
             if path not in paths:
                 paths.append(path)
         messages.append(entry.message)
+        revisions.append("\nhttps://hub.boxuk.com/projects/amaxus4custom/repository/revisions/" + str(entry.revision.number))
     last_revision = log[0].revision
         
-    return last_revision, authors, paths, messages
+    return last_revision, authors, paths, messages, revisions
 
 if __name__ == '__main__':
     read_config()
@@ -96,8 +100,8 @@ if __name__ == '__main__':
     print '- Press %s to quit -' % '^C'
     last_revision = None
     while True:
-        last_revision, authors, paths, messages = discover_changes(last_revision)
+        last_revision, authors, paths, messages, revisions = discover_changes(last_revision)
         if paths is not None:
-            log_message(paths, authors, messages)
-            notify(paths, authors)
+            log_message(paths, authors, messages, revisions)
+            notify(paths, authors, messages, revisions)
         time.sleep(30)
