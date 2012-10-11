@@ -2,9 +2,9 @@
 #
 # script to notify the user for changes in a subversion repository.
 #
-# Depends on a configuration file with the following entries:
+# Depends on a configuration file with one or more of the following entries:
 #
-#   [server]
+#   [repo-name]
 #   server=SVN_REPO_TO_MONITOR
 #   user=YOUR_SVN_USERNAME
 #   pass=YOUR_SVN_PASSWORD
@@ -12,9 +12,9 @@
 
 try:
     import pysvn, pynotify
-except:
+except ImportError:
     print "Error while loading external depencencies."
-    print "Make sure 'pysvn' and 'pynotify' is installed."
+    print "Make sure 'pysvn' and 'pynotify' are installed."
     exit()
 
 import datetime, time, os, ConfigParser as cfg
