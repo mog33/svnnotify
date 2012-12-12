@@ -69,11 +69,15 @@ class SvnNotifier():
             )
         log = log[:-1]   # Ignore last revision
         if len(log) > 0:
+            logging.info("%s new commits for %s" % (len(log), self.name))
             # update last revision in config file
             last_revision = log[0].revision.number
             self.parser.set(self.name, "last_revision", last_revision)
             self.parser.write(open(self.config_file, 'w'))
             log.reverse()
+            if len(log)>5: # Show only last 10 commits
+                pynotify.Notification("Even more commits for repository %s" % self.name, "There are %s more new commits in the repository" % (len(log)-5), "view-refresh").show()
+                log = log [-5:]
             for entry in log:
                 author = entry.get('author')
                 rev = entry.revision.number
@@ -93,7 +97,8 @@ def main():
     logging.basicConfig(
         level = logging.INFO,
         format = "%(asctime)s %(levelname)s: %(message)s",
-        datefmt = "%d.%m.%Y %H:%M:%S")
+        datefmt = "%d.%m.%Y %H:%M:%S",
+        filename= os.path.join(path, 'svnnotify.log'))
     config_file = os.path.join(path, 'svnnotify.cfg')
     repos = []
     try:
@@ -101,8 +106,14 @@ def main():
         parser.read(config_file)
         for section in parser.sections():
             server = parser.get(section, 'server')
-            user = parser.get(section, 'user')
-            passw = parser.get(section, 'pass')
+            if parser.has_option(section, 'user'):
+                user = parser.get(section, 'user')
+            else:
+                user = None
+            if parser.has_option(section, 'pass'):
+                passw = parser.get(section, 'pass')
+            else:
+                passw = None
             repos.append(SvnNotifier(section, server, user, passw, parser, config_file))
             logging.info('Monitoring SVN repository %s (%s)' % (section, server))
     except BaseException as exception:
