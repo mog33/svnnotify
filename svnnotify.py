@@ -14,8 +14,8 @@ try:
     import pynotify
     from pysvn import Client, Revision, opt_revision_kind, ClientError
 except ImportError:
-    print "Error while loading external depencencies."
-    print "Make sure 'pysvn' and 'pynotify' are installed."
+    print("Error while loading external depencencies.")
+    print("Make sure 'pysvn' and 'pynotify' are installed.")
     exit()
 
 import datetime, time, os, ConfigParser as cfg, logging
@@ -127,7 +127,6 @@ def main():
             try:
                 repo.discover_changes()
             except ClientError as e:
-                print e
                 logging.error("Repo %s not accessible" % repo.name)
                 logging.error(e)
         time.sleep(60 * 5)  # Every 5 minutes
