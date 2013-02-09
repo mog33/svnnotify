@@ -36,7 +36,7 @@ class SvnNotifier():
     def notify(self, author, date, revision, message, paths):
         """Display the changed paths using libnotify"""
         title_string = 'New commit #%s to repository %s' % (revision, self.name)
-        message_string = "[%s] %s\n <i>%s</i>\n" % \
+        message_string = "<p>[%s] %s</p> <p><i>%s</i>" % \
                         (date.strftime("%d.%m %H:%M"), author, message)
         message_string += "<ul>"
         for p in paths[:5]:
@@ -45,7 +45,8 @@ class SvnNotifier():
             message_string += "<li>%s</li>" % p
         if len(paths)>6:
             message_string += "<li>...</li>"
-        message_string += "</ul>"
+        message_string += "</ul></p>"
+        logging.debug("Open pynotify.Notification: %s | %s" % (title_string,message_string))
         pynotify.Notification(title_string, message_string, "view-refresh").show()
 
     def credentials(self, realm, username, may_save):
