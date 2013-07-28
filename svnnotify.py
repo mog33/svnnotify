@@ -10,14 +10,8 @@
 #   pass=YOUR_SVN_PASSWORD
 #
 
-try:
-    import pynotify
-    from pysvn import Client, Revision, opt_revision_kind, ClientError
-except ImportError:
-    print("Error while loading external depencencies.")
-    print("Make sure 'pysvn' and 'pynotify' are installed.")
-    exit()
-
+import pynotify
+from pysvn import Client, Revision, opt_revision_kind, ClientError
 import datetime, time, os, logging
 
 
@@ -92,45 +86,67 @@ class SvnNotifier():
         else:
             logging.info("No new commits for %s" % self.name)
 
-def get_config_file():
-    from appdirs import user_data_dir
-    path = os.path.dirname(__file__)
-    cfg = os.path.join(path,"svnnotify.cfg")
-    if os.path.isfile(cfg):
-        return cfg
-    cfg = os.path.join(user_data_dir("svnnotify"),"svnnotify.cfg")
-    if os.path.isfile(cfg):
-        return cfg
-    print("No configuration file found")
-    exit()
 
+class Configuration():
+    
+    def __init__(self, config_file):
+        if config_file is None:
+            self.config_file = self.get_config_file()
+        else:
+            self.config_file = config_file
+        logging.info("SvnNotify started with configuration file %s" % config_file)
+    
+    def get_config_file(self):
+        from appdirs import user_data_dir
+        path = os.path.dirname(__file__)
+        cfg = os.path.join(path,"svnnotify.cfg")
+        if os.path.isfile(cfg):
+            return cfg
+        cfg = os.path.join(user_data_dir("svnnotify"),"svnnotify.cfg")
+        if os.path.isfile(cfg):
+            return cfg
+        else:
+            if not os.path.exists(user_data_dir("svnnotify")):
+                os.makedirs(user_data_dir("svnnotify"))
+            f = open(cfg, "w")
+            f.write("""[Repo1Name]
+server = https://server1.com/svn/repo
+user = username
+pass = password
 
-def create_repos_from_svn_config(config_file):
-    from ConfigParser import ConfigParser
-    parser = ConfigParser()
-    parser.read(config_file)
-    repos = []
-    for section in parser.sections():
-        try:
-            server = parser.get(section, 'server')
-        except BaseException as e:
-            logging.critical("Error while parsing config file %s\n%s" % (config_file,e))
+[Repo2Name]
+server = svn+ssh://username@server2.com/svn/repo""") 
+            print("Configuration file for svnnotify created: %s" % cfg)
+            print("Modify it to your needs")
             exit()
-        if parser.has_option(section, 'user'):
-            user = parser.get(section, 'user')
+
+
+    def create_repos_from_svn_config(self):
+        from ConfigParser import ConfigParser
+        parser = ConfigParser()
+        parser.read(self.config_file)
+        repos = []
+        for section in parser.sections():
+            try:
+                server = parser.get(section, 'server')
+            except BaseException as e:
+                logging.critical("Error while parsing config file %s\n%s" % (self.config_file,e))
+                exit()
+            if parser.has_option(section, 'user'):
+                user = parser.get(section, 'user')
+            else:
+                user = None
+            if parser.has_option(section, 'pass'):
+                passw = parser.get(section, 'pass')
+            else:
+                passw = None
+            repos.append(SvnNotifier(section, server, user, passw, parser, self.config_file))
+            logging.info('Monitoring SVN repository %s (%s)' % (section, server))
+        if repos:
+            return repos
         else:
-            user = None
-        if parser.has_option(section, 'pass'):
-            passw = parser.get(section, 'pass')
-        else:
-            passw = None
-        repos.append(SvnNotifier(section, server, user, passw, parser, config_file))
-        logging.info('Monitoring SVN repository %s (%s)' % (section, server))
-    if repos:
-        return repos
-    else:
-        print("No sections in configuration file found. Aborting")
-        exit()
+            print("No sections in configuration file found. Aborting")
+            exit()
 
 
 def svn_notify(config_file, intervall):
@@ -141,10 +157,8 @@ def svn_notify(config_file, intervall):
         datefmt = "%d.%m.%Y %H:%M:%S",
         #filename= os.path.join(path, 'svnnotify.log')
         )
-    if config_file == None:
-        config_file = get_config_file()
-    logging.info("SvnNotify started with configuration file %s" % config_file)
-    repos = create_repos_from_svn_config(config_file)
+    conf = Configuration(config_file)
+    repos = conf.create_repos_from_svn_config()
     pynotify.init("SVN Monitor")
     while True:
         for repo in repos:
