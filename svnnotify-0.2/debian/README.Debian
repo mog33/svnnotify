@@ -1,0 +1,6 @@
+svnnotify for Debian
+--------------------
+
+notifies about changes in specified SVN repositories
+
+ -- mog33 <ctrl.alt.del@gmx.net>  Mon, 29 Jul 2013 18:52:36 +0200

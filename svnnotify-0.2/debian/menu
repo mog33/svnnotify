@@ -1,0 +1,2 @@
+?package(svnnotify):needs="X11" section="Applications/Programming"\
+  title="svnnotify" command="/usr/bin/svnnotify"
