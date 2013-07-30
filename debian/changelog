@@ -1,0 +1,13 @@
+svnnotify (0.3-1) unstable; urgency=low
+
+  * Minor bugfixes
+  * correct path as working directory
+  * using debhelper for creating debian package
+
+ -- mog33 <ctrl.alt.del@gmx.net>  Tue, 30 Jul 2013 08:58:31 +0200
+
+svnnotify (0.2-1) unstable; urgency=low
+
+  * Initial release 
+
+ -- mog33 <ctrl.alt.del@gmx.net>  Mon, 29 Jul 2013 18:52:36 +0200

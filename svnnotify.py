@@ -11,8 +11,9 @@
 #
 
 import pynotify
-from pysvn import Client, Revision, opt_revision_kind, ClientError
 import datetime, time, os, logging
+from pysvn import Client, Revision, opt_revision_kind, ClientError
+from appdirs import user_data_dir
 
 
 class SvnNotifier():
@@ -88,18 +89,16 @@ class SvnNotifier():
 
 
 class Configuration():
-    
+
     def __init__(self, config_file):
-        if config_file is None:
-            self.config_file = self.get_config_file()
-        else:
+        if config_file:
             self.config_file = config_file
+        else:
+            self.config_file = self.get_config_file()
         logging.info("SvnNotify started with configuration file %s" % config_file)
-    
+
     def get_config_file(self):
-        from appdirs import user_data_dir
-        path = os.path.dirname(__file__)
-        cfg = os.path.join(path,"svnnotify.cfg")
+        cfg = os.path.join(os.getcwd(),"svnnotify.cfg")
         if os.path.isfile(cfg):
             return cfg
         cfg = os.path.join(user_data_dir("svnnotify"),"svnnotify.cfg")
@@ -117,7 +116,7 @@ pass = password
 [Repo2Name]
 server = svn+ssh://username@server2.com/svn/repo""") 
             print("Configuration file for svnnotify created: %s" % cfg)
-            print("Modify it to your needs")
+            print("Modify it to your needs before restarting")
             exit()
 
 
@@ -149,7 +148,7 @@ server = svn+ssh://username@server2.com/svn/repo""")
             exit()
 
 
-def svn_notify(config_file, intervall):
+def svn_notify(config_file, interval):
     path = os.path.dirname(__file__)
     logging.basicConfig(
         level = logging.INFO,
@@ -160,21 +159,21 @@ def svn_notify(config_file, intervall):
     conf = Configuration(config_file)
     repos = conf.create_repos_from_svn_config()
     pynotify.init("SVN Monitor")
+    pynotify.Notification("SvnNotify started", "SvnNotify started with configuration file %s\nMonitoring %i repositories." % (conf.config_file, len(repos)), "view-refresh").show()
     while True:
         for repo in repos:
             try:
                 repo.discover_changes()
             except ClientError as e:
                 logging.error("Repo %s not accessible\n%s" % (repo.name,e))
-        time.sleep(intervall)
+        time.sleep(interval)
 
 
 if __name__ == '__main__':
     from argparse import ArgumentParser, FileType
     parser = ArgumentParser(description="Notifies about changes in SVN repositories")
-    parser.add_argument("-c","--config", help="path to configuration file",
-                        default=None)
-    parser.add_argument("-i","--intervall", help="update intervall in seconds (default 5 minutes)", type=int, default=60*5)
-    parser.add_argument("-v","--version", help="shows version of svnnotify", action='version', version='%(prog)s 0.2')
+    parser.add_argument("-c","--config", help="path to configuration file (default svnnotify.cfg in working directory or in %s)" % user_data_dir("svnnotify"))
+    parser.add_argument("-v","--version", help="shows version of svnnotify", action='version', version='%(prog)s 0.3')
+    parser.add_argument("-i","--interval", help="update interval in seconds (default 5 minutes)", type=int, default=60*5)
     args = parser.parse_args()
-    svn_notify(args.config, args.intervall)
+    svn_notify(args.config, args.interval)

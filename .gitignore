@@ -3,3 +3,7 @@ svnnotify.cfg
 *~
 svnnotify.log
 /.project
+*debhelper*
+files
+svnnotify
+*.substvars

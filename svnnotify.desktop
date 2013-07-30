@@ -1,0 +1,8 @@
+[Desktop Entry]
+Comment=SVN Update Notifier
+Exec=/usr/bin/svnnotify
+Name=svnnotify
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Development
