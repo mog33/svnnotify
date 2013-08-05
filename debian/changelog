@@ -1,3 +1,9 @@
+svnnotify (0.3-1ubuntu1) UNRELEASED; urgency=low
+
+  * added desktop icon
+
+ -- mog33 <ctrl.alt.del@gmx.net>  Mon, 05 Aug 2013 21:59:51 +0200
+
 svnnotify (0.3-1) unstable; urgency=low
 
   * Minor bugfixes

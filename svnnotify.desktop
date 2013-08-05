@@ -6,3 +6,4 @@ StartupNotify=true
 Terminal=false
 Type=Application
 Categories=Development
+Icon=view-refresh

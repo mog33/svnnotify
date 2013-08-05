@@ -108,13 +108,13 @@ class Configuration():
             if not os.path.exists(user_data_dir("svnnotify")):
                 os.makedirs(user_data_dir("svnnotify"))
             f = open(cfg, "w")
-            f.write("""[Repo1Name]
-server = https://server1.com/svn/repo
-user = username
-pass = password
+            f.write("""#[Repo1Name]
+#server = https://server1.com/svn/repo
+#user = username
+#pass = password
 
-[Repo2Name]
-server = svn+ssh://username@server2.com/svn/repo""") 
+#[Repo2Name]
+#server = svn+ssh://username@server2.com/svn/repo""") 
             print("Configuration file for svnnotify created: %s" % cfg)
             print("Modify it to your needs before restarting")
             exit()
@@ -159,7 +159,7 @@ def svn_notify(config_file, interval):
     conf = Configuration(config_file)
     repos = conf.create_repos_from_svn_config()
     pynotify.init("SVN Monitor")
-    pynotify.Notification("SvnNotify started", "SvnNotify started with configuration file %s\nMonitoring %i repositories." % (conf.config_file, len(repos)), "view-refresh").show()
+    pynotify.Notification("SvnNotify started", "SvnNotify started with configuration file %s monitoring %i repositories." % (conf.config_file, len(repos)), "view-refresh").show()
     while True:
         for repo in repos:
             try:
