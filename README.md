@@ -2,6 +2,6 @@ I modified http://ghost.tweakblogs.net/blog/3073/subversion-repository-monitor.h
 commit messages and changed how often it runs. Furthermore, now multiple repositories are supported.
 
 run following command to build a debian package
-debuild -b -us -uc
+> debuild -b -us -uc
 
 
