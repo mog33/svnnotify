@@ -1,2 +1,3 @@
 svnnotify.py /usr/share/svnnotify
+SvnRepoMonitor.py /usr/share/svnnotify
 svnnotify.desktop /usr/share/applications

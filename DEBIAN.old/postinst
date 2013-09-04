@@ -1,5 +1,0 @@
-set -e
-
-ln -s /usr/share/svnnotify/svnnotify.py /usr/bin/svnnotify
-
-pip install appdirs
