@@ -7,3 +7,4 @@ svnnotify.log
 files
 svnnotify
 *.substvars
+*.pyc
