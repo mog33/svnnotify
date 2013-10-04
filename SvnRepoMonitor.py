@@ -12,11 +12,11 @@ class SvnRepoMonitor():
         self.svn_username = svn_username
         self.svn_password = svn_password
         self.client = Client()
-        self.client.callback_get_login = self.credentials
+        self.client.callback_get_login = self._credentials
         self.parser = ConfigParser()
         self.config_file = config_file
 
-    def notify(self, author, date, revision, message, paths):
+    def _notify(self, author, date, revision, message, paths):
         """Display the changed paths using libnotify"""
         title_string = 'New commit #%s in repository %s' % (revision, self.name)
         message_string = "<p>[%s] %s</p> <p><i>%s</i>" % \
@@ -32,7 +32,7 @@ class SvnRepoMonitor():
         logging.debug("Open pynotify.Notification: %s | %s" % (title_string, message_string))
         pynotify.Notification(title_string, message_string, "view-refresh").show()
 
-    def credentials(self, realm, username, may_save):
+    def _credentials(self, realm, username, may_save):
         """Return the default login credentials"""
         return True, self.svn_username, self.svn_password, False
 
@@ -70,7 +70,7 @@ class SvnRepoMonitor():
                 paths = []
                 for change in entry.changed_paths:
                     paths.append(change.path)
-                self.notify(author, date, rev, message, paths)
+                self._notify(author, date, rev, message, paths)
         else:
             logging.debug("No new commits in repository %s" % self.name)
  
