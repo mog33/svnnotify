@@ -1,11 +1,11 @@
 import pynotify
-import datetime, logging
+import datetime
+import logging
 from pysvn import Client, Revision, opt_revision_kind
 from ConfigParser import ConfigParser
 
 
 class SvnRepoMonitor():
-
     def __init__(self, name, svn_root, svn_username, svn_password, config_file):
         self.name = name
         self.svn_root = svn_root
@@ -20,13 +20,13 @@ class SvnRepoMonitor():
         """Display the changed paths using libnotify"""
         title_string = 'New commit #%s in repository %s' % (revision, self.name)
         message_string = "<p>[%s] %s</p> <p><i>%s</i>" % \
-                        (date.strftime("%d.%m %H:%M"), author, message)
+                         (date.strftime("%d.%m %H:%M"), author, message)
         message_string += "<ul>"
         for p in paths[:5]:
-            if len(p)>50:
+            if len(p) > 50:
                 p = "...%s" % p[-50:]
             message_string += "<li>%s</li>" % p
-        if len(paths)>6:
+        if len(paths) > 6:
             message_string += "<li>...</li>"
         message_string += "</ul></p>"
         logging.debug("Open pynotify.Notification: %s | %s" % (title_string, message_string))
@@ -50,7 +50,7 @@ class SvnRepoMonitor():
             self.svn_root,
             discover_changed_paths=True,
             revision_end=Revision(opt_revision_kind.number, last_revision)
-            )
+        )
         log = log[:-1]   # Ignore last revision
         if len(log) > 0:
             logging.info("%s new commits in repository %s" % (len(log), self.name))
@@ -59,9 +59,11 @@ class SvnRepoMonitor():
             self.parser.set(self.name, "last_revision", last_revision)
             self.parser.write(open(self.config_file, 'w'))
             log.reverse()
-            if len(log)>5: # Show only most recent commits
-                pynotify.Notification("Even more commits in repository %s" % self.name, "There are %s more new commits in the repository" % (len(log)-5), "view-refresh").show()
-                log = log [-5:]
+            if len(log) > 5: # Show only most recent commits
+                pynotify.Notification("Even more commits in repository %s" % self.name,
+                                      "There are %s more new commits in the repository" % (len(log) - 5),
+                                      "view-refresh").show()
+                log = log[-5:]
             for entry in log:
                 author = entry.get('author')
                 rev = entry.revision.number
